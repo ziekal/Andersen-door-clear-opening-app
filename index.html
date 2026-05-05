@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Door Clear Opening App</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="Door Clear Opening">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07343d">
+
+<style>
+:root {
+  --bg:#07343d;
+  --panel:#0b4750;
+  --cream:#fff0cf;
+  --input:#f4f4f6;
+  --green:#9bd46b;
+  --red:#f08072;
+  --ink:#041f26;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  min-height:100vh;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#07343d;
+  color:var(--cream);
+}
+.wrap {
+  width:min(100%,520px);
+  margin:0 auto;
+  padding:24px 16px 36px;
+}
+h1 {
+  margin:0 0 32px;
+  text-align:center;
+  font-size:36px;
+  line-height:1.35;
+  font-weight:900;
+  letter-spacing:2px;
+  color:var(--cream);
+  text-transform:uppercase;
+}
+.card {
+  background:rgba(8,70,79,.92);
+  border-radius:20px;
+  padding:16px;
+  margin:14px 0;
+}
+label {
+  display:block;
+  margin:0 0 8px;
+  font-weight:900;
+  font-size:13px;
+}
+select,input {
+  width:100%;
+  min-height:42px;
+  border:0;
+  border-radius:11px;
+  padding:10px 12px;
+  font-size:14px;
+  font-weight:800;
+  background:var(--input);
+  color:#000;
+}
+select {
+  white-space:normal;
+}
+.field {
+  margin-bottom:14px;
+}
+.selected {
+  margin-top:10px;
+  padding:12px;
+  border-radius:13px;
+  background:rgba(255,240,207,.12);
+  border:1px solid rgba(255,240,207,.2);
+  font-size:14px;
+  line-height:1.3;
+  font-weight:900;
+}
+.result {
+  border-radius:14px;
+  padding:20px;
+  color:#000;
+  text-align:center;
+  font-size:26px;
+  font-weight:900;
+}
+.green { background:var(--green); }
+.red { background:var(--red); }
+.small {
+  display:block;
+  font-size:12px;
+  opacity:.75;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.hidden {
+  display:none;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <h1>CLEAR<br>OPENING<br>APP</h1>
+
+  <div class="card">
+    <div class="field">
+      <label for="doorType">Door Type</label>
+      <select id="doorType"></select>
+      <div class="selected" id="selectedName"></div>
+    </div>
+
+    <div class="field">
+      <label for="width">Width</label>
+      <input id="width" type="number" inputmode="decimal" step="0.001" value="72">
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="result" class="result red">
+      <span class="small">Clear Opening</span>
+      <span id="answer">0</span> in.
+    </div>
+  </div>
+
+  <div class="hidden" id="formula"></div>
+</div>
+
+<script>
+const doors = [
+  {name:"Permashield 2 panel Sliding", formula:"(width / 2) - 7.5", calc:function(w){return (w/2)-7.5;}},
+  {name:"Narroline 2 panel sliding", formula:"(width / 2) - 7.5", calc:function(w){return (w/2)-7.5;}},
+  {name:"Narroline 4 panel sliding", formula:"(width / 2) - 13.75", calc:function(w){return (w/2)-13.75;}},
+  {name:"400 Frenchwood inswing 1 panel", formula:"width - 5.744", calc:function(w){return w-5.744;}},
+  {name:"400 Frenchwood inswing 2 panel-2 panel open", formula:"width - 7.394", calc:function(w){return w-7.394;}},
+  {name:"400 Frenchwood inswing 2 panel-1 panel open", formula:"(width - 10.55) / 2", calc:function(w){return (w-10.55)/2;}},
+  {name:"400 Frenchwood inswing 3 panel", formula:"(width - 16.106) / 3", calc:function(w){return (w-16.106)/3;}},
+  {name:"A-Series inswing 1 panel", formula:"width - 5.799", calc:function(w){return w-5.799;}},
+  {name:"A-Series inswing 2 panel-2 panel open", formula:"width - 7.477", calc:function(w){return w-7.477;}},
+  {name:"A-Series inswing 2 panel-1 panel open", formula:"(width - 10.55) / 2", calc:function(w){return (w-10.55)/2;}}
+];
+
+const doorType = document.getElementById("doorType");
+const widthInput = document.getElementById("width");
+const selectedName = document.getElementById("selectedName");
+const result = document.getElementById("result");
+const answer = document.getElementById("answer");
+const formula = document.getElementById("formula");
+
+doors.forEach((door, i) => {
+  const option = document.createElement("option");
+  option.value = i;
+  option.textContent = door.name;
+  doorType.appendChild(option);
+});
+
+function fmt(value) {
+  return Number(value).toFixed(2);
+}
+
+function update() {
+  const door = doors[Number(doorType.value)];
+  const width = Number(widthInput.value) || 0;
+  const clearOpening = door.calc(width);
+
+  selectedName.textContent = door.name;
+  answer.textContent = fmt(clearOpening);
+  formula.textContent = door.formula;
+  result.className = "result " + (clearOpening >= 32 ? "green" : "red");
+}
+
+doorType.addEventListener("change", update);
+widthInput.addEventListener("input", update);
+update();
+</script>
+</body>
+</html>
